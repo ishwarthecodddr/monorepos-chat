@@ -52,7 +52,6 @@ app.post("/signin", async (req: Request, res: any) => {
         message: "Invalid credentials",
       });
     }
-
     const token = jwt.sign({ userId: user.id }, JWT_SECRET);
     return res.status(200).json({
       message: "Signed in successfully",
@@ -86,7 +85,7 @@ app.post(
         },
       });
       res.status(200).json({
-        msg:"Room created"+room.id
+        msg: "Room created" + room.id,
       });
       return;
     } catch (error) {
@@ -97,23 +96,34 @@ app.post(
     }
   }
 );
-app.get('/room/:roomId', async (req, res) => {
-  const roomId = Number(req.params.roomId)
+app.get("/room/messages/:roomId", async (req, res) => {
+  const roomId = Number(req.params.roomId);
   const messages = await prismaClient.chat.findMany({
     where: {
-      roomId:roomId
+      roomId: roomId,
     },
     orderBy: {
-      id:"desc"
+      id: "desc",
     },
-    take:50
-  })
+    take: 50,
+  });
   if (!messages) {
-    res.json({msg:"unable to fetch messages"})
-    return
+    res.json({ msg: "unable to fetch messages" });
+    return;
   }
-   res.json(messages);
-})
+  res.json(messages);
+});
+app.get("/room/:slug", async (req, res) => {
+  const slug = req.params.slug;
+  const room = await prismaClient.room.findFirst({
+    where: {
+      slug,
+    },
+  });
+  res.json({
+    room
+  })
+});
 app.listen(3002, () => {
   console.log("Listening...");
 });
